@@ -12,26 +12,20 @@ async function scrapeWebsite(url) {
     if (!fs.existsSync(savePath)) fs.mkdirSync(savePath, { recursive: true });
 
     console.log("📥 Downloading static files...");
-    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)" "${url}" -P "${savePath}"`;
+    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent="Mozilla/5.0 (compatible)" ${url}`;
 
     try {
-        execSync(wgetCommand, { stdio: 'inherit' });
+        execSync(wgetCommand, { stdio: 'inherit', cwd: savePath });
         console.log("✅ Static files downloaded successfully!");
     } catch (error) {
         console.error("🚨 wget error:", error);
         throw new Error("wget failed to download the website.");
     }
 
-    const zipPath = path.join(__dirname, 'downloads', `${domain}.zip`);
+    const zipPath = path.join(__dirname, 'downloads', `${new URL(url).hostname}.zip`);
+    await createZip(savePath, zipPath);
 
-    try {
-        await createZip(savePath, zipPath);
-    } catch (zipError) {
-        console.error("🚨 ZIP creation error:", zipError);
-        throw new Error("Failed to create ZIP file.");
-    }
-
-    return zipPath; // net olarak ZIP dosya yolunu döndür
+    return zipPath;
 }
 
 async function createZip(sourceDir, zipPath) {
@@ -45,13 +39,13 @@ async function createZip(sourceDir, zipPath) {
         });
 
         archive.on('error', (err) => {
+            console.error("🚨 ZIP creation error:", err);
             reject(err);
         });
 
         archive.pipe(output);
         archive.directory(sourceDir, false);
         archive.finalize();
-    });
 }
 
 module.exports = { scrapeWebsite };
