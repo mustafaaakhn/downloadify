@@ -116,7 +116,7 @@
         downloadBtn.disabled = true;
 
         try {
-            const backendUrl = "http://localhost:3000";
+            const backendUrl = "https://downloadify-2.onrender.com";
             const response = await fetch(`${backendUrl}/api/scrape`, { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
