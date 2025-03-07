@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 const { scrapeWebsite } = require("./scraper");
-const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,34 +16,29 @@ app.get("/", (req, res) => {
 
 app.post("/api/scrape", async (req, res) => {
     const { url } = req.body;
-
     if (!url) {
         return res.status(400).json({ error: "URL is required." });
     }
 
     try {
         const zipPath = await scrapeWebsite(url);
-        
-        // ZIP dosyası mevcut mu kontrolü
+
         if (!fs.existsSync(zipPath)) {
-            throw new Error("ZIP file not found.");
+            throw new Error("ZIP file does not exist.");
         }
 
-        // Uygun header'lar ile ZIP dosyasını gönder
-        res.setHeader('Content-Type', 'application/zip');
-        res.download(zipPath, path.basename(zipPath), (err) => {
-            if (err) {
-                console.error("Error sending file:", err);
-                res.status(500).json({ error: "Error sending the file." });
-            }
+        res.set({
+            "Content-Type": "application/zip",
+            "Content-Disposition": `attachment; filename="${path.basename(zipPath)}"`,
         });
 
+        res.sendFile(zipPath);
     } catch (error) {
-        console.error("🚨 Hata oluştu:", error);
+        console.error("🚨 Backend error:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
 app.listen(port, "0.0.0.0", () => {
-    console.log(`✅ Backend çalışıyor: http://localhost:${port}`);
+    console.log(`✅ Backend running at: http://localhost:${port}`);
 });
