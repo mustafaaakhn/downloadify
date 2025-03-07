@@ -1,45 +1,57 @@
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
+const { execSync } = require('child_process');
 
-const scrapeWebsite = async (url) => {
-    const { exec } = require('child_process');
+async function scrapeWebsite(url) {
+    console.log("🌍 Downloading website:", url);
 
-    const savePath = path.join(__dirname, 'downloads', new URL(url).hostname);
+    const domain = new URL(url).hostname;
+    const savePath = path.join(__dirname, 'downloads', domain);
 
     if (!fs.existsSync(savePath)) fs.mkdirSync(savePath, { recursive: true });
 
-    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent="Mozilla/5.0 (compatible)" ${url}`;
+    console.log("📥 Downloading static files...");
+    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)" "${url}" -P "${savePath}"`;
 
     try {
-        await new Promise((resolve, reject) => {
-            exec(wgetCommand, { cwd: savePath }, (error) => {
-                if (error) reject(error);
-                else resolve();
-            });
-        });
+        execSync(wgetCommand, { stdio: 'inherit' });
+        console.log("✅ Static files downloaded successfully!");
     } catch (error) {
-        throw new Error(`wget error: ${error.message}`);
+        console.error("🚨 wget error:", error);
+        throw new Error("wget failed to download the website.");
     }
 
-    const zipPath = `${savePath}.zip`;
-    await zipFolder(savePath, zipPath);
+    const zipPath = path.join(__dirname, 'downloads', `${domain}.zip`);
 
-    return zipPath;
-};
+    try {
+        await createZip(savePath, zipPath);
+    } catch (zipError) {
+        console.error("🚨 ZIP creation error:", zipError);
+        throw new Error("Failed to create ZIP file.");
+    }
 
-const zipFolder = (source, outPath) => {
+    return zipPath; // net olarak ZIP dosya yolunu döndür
+}
+
+async function createZip(sourceDir, zipPath) {
     return new Promise((resolve, reject) => {
         const output = fs.createWriteStream(zipPath);
         const archive = archiver('zip', { zlib: { level: 9 } });
 
-        output.on('close', resolve);
-        archive.on('error', reject);
+        output.on('close', () => {
+            console.log(`✅ ZIP created successfully: ${zipPath} (${archive.pointer()} bytes)`);
+            resolve(zipPath);
+        });
+
+        archive.on('error', (err) => {
+            reject(err);
+        });
 
         archive.pipe(output);
-        archive.directory(source, false);
+        archive.directory(sourceDir, false);
         archive.finalize();
     });
-};
+}
 
-module.exports = { scrapeWebsite };  
+module.exports = { scrapeWebsite };
