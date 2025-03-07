@@ -96,13 +96,13 @@
         <script src="assets/js/bootstrap.bundle.min.js"></script>
 
         <!-- Custom JS Script -->
-        <script>
+       <script>
 document.addEventListener("DOMContentLoaded", function () {
     const downloadBtn = document.getElementById("downloadBtn");
     const urlInput = document.getElementById("urlInput");
 
     downloadBtn.addEventListener("click", async function () {
-        const url = urlInput.value;
+        const url = urlInput.value.trim();
 
         if (!url) {
             alert("Please enter a URL!");
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (!response.ok) {
-                throw new Error(`Request failed with status ${response.status}`);
+                throw new Error(`Request failed: ${response.status}`);
             }
 
             const blob = await response.blob();
@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(urlBlob);
 
             downloadBtn.innerHTML = "✅ Download Complete!";
         } catch (err) {
