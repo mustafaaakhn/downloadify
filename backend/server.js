@@ -7,6 +7,14 @@ const { scrapeWebsite } = require("./scraper");
 const app = express();
 const port = process.env.PORT || 3000;
 
+// 🔥 HTTPS Zorunlu Hale Getir
+app.use((req, res, next) => {
+    if (req.headers["x-forwarded-proto"] !== "https") {
+        return res.redirect("https://" + req.headers.host + req.url);
+    }
+    next();
+});
+
 app.use(cors());
 app.use(express.json());
 
