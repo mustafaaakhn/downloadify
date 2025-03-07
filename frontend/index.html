@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         downloadBtn.innerHTML = "⏳ Downloading...";
         downloadBtn.disabled = true;
 
-        const backendUrl = "https://downloadify-jt88.onrender.com/";
+        const backendUrl = "https://senin-backend-adin.onrender.com"; // 👈 Render URL'ini gir
 
         try {
             const response = await fetch(`${backendUrl}/api/scrape`, {
@@ -121,7 +121,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({ url }),
             });
 
-            if (!response.ok) throw new Error("Backend error!");
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(`Backend error: ${error.message || error}`);
+            }
 
             const blob = await response.blob();
             const urlBlob = URL.createObjectURL(blob);
@@ -131,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(urlBlob);
+            URL.revokeObjectURL(urlBlob); // Hafızayı temizle
 
             downloadBtn.innerHTML = "✅ Download Complete!";
         } catch (error) {
@@ -144,6 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }, 2000);
         }
     });
+});
 </script>
 
 
