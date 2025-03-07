@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         downloadBtn.innerHTML = "⏳ Downloading...";
         downloadBtn.disabled = true;
 
-        const backendUrl = "https://downloadify-jt88.onrender.com";
+        const backendUrl = "https://api.downloadify.app";
 
         try {
             const response = await fetch(`${backendUrl}/api/scrape`, {
