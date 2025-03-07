@@ -99,9 +99,9 @@
         <script>
 document.addEventListener("DOMContentLoaded", function () {
     const downloadBtn = document.getElementById("downloadBtn");
+    const urlInput = document.getElementById("urlInput");
 
     downloadBtn.addEventListener("click", async function () {
-        const urlInput = document.getElementById("urlInput");
         const url = urlInput.value;
 
         if (!url) {
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         downloadBtn.innerHTML = "⏳ Downloading...";
         downloadBtn.disabled = true;
 
-        const backendUrl = "https://downloadify-jt88.onrender.com/"; // 👈 Render URL'ini gir
+        const backendUrl = "https://downloadify-jt88.onrender.com";
 
         try {
             const response = await fetch(`${backendUrl}/api/scrape`, {
@@ -122,8 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (!response.ok) {
-                const errorMessage = await response.text();
-                throw new Error(`Backend error: ${error.message || error}`);
+                throw new Error(`Request failed with status ${response.status}`);
             }
 
             const blob = await response.blob();
@@ -134,12 +133,11 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(urlBlob); // Hafızayı temizle
 
             downloadBtn.innerHTML = "✅ Download Complete!";
-        } catch (error) {
-            console.error(error);
-            downloadBtn.innerHTML = "❌ Error Occurred";
+        } catch (err) {
+            console.error("❌ Error occurred:", err);
+            downloadBtn.innerHTML = "❌ Error occurred!";
         } finally {
             downloadBtn.disabled = false;
             setTimeout(() => {
