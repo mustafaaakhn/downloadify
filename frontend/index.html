@@ -96,7 +96,7 @@
         <script src="assets/js/bootstrap.bundle.min.js"></script>
 
         <!-- Custom JS Script -->
-       <script>
+        <script>
 document.addEventListener("DOMContentLoaded", function () {
     const downloadBtn = document.getElementById("downloadBtn");
 
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         downloadBtn.innerHTML = "⏳ Downloading...";
         downloadBtn.disabled = true;
 
-        const backendUrl = "https://senin-backend-adin.onrender.com";  // Backend URL BURAYA
+        const backendUrl = "https://senin-backend-adin.onrender.com"; // Render backend URL'ni gir
 
         try {
             const response = await fetch(`${backendUrl}/api/scrape`, {
@@ -130,21 +130,22 @@ document.addEventListener("DOMContentLoaded", function () {
             downloadLink.download = "website.zip";
             document.body.appendChild(downloadLink);
             downloadLink.click();
-            URL.revokeObjectURL(urlBlob);
             document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(urlBlob);
 
             downloadBtn.innerHTML = "✅ Download Complete!";
         } catch (error) {
             console.error(error);
             downloadBtn.innerHTML = "❌ Error Occurred";
         } finally {
+            downloadBtn.disabled = false;
             setTimeout(() => {
                 downloadBtn.innerHTML = 'Download <i class="fa-solid fa-download"></i>';
-                downloadBtn.disabled = false;
             }, 2000);
         }
     });
-});
+</script>
+
 
     </body>
 </html>
