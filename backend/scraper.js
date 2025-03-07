@@ -12,7 +12,7 @@ async function scrapeWebsite(url) {
     if (!fs.existsSync(savePath)) fs.mkdirSync(savePath, { recursive: true });
 
     console.log("📥 Downloading static files...");
-    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent="Mozilla/5.0 (compatible)" ${url}`;
+    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent=\"Mozilla/5.0 (compatible)\" ${url}`;
 
     try {
         execSync(wgetCommand, { stdio: 'inherit', cwd: savePath });
@@ -22,7 +22,7 @@ async function scrapeWebsite(url) {
         throw new Error("wget failed to download the website.");
     }
 
-    const zipPath = path.join(__dirname, 'downloads', `${new URL(url).hostname}.zip`);
+    const zipPath = path.join(__dirname, 'downloads', `${domain}.zip`);
     await createZip(savePath, zipPath);
 
     return zipPath;
@@ -46,6 +46,7 @@ async function createZip(sourceDir, zipPath) {
         archive.pipe(output);
         archive.directory(sourceDir, false);
         archive.finalize();
+    });
 }
 
 module.exports = { scrapeWebsite };
