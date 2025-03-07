@@ -96,8 +96,8 @@
         <script src="assets/js/bootstrap.bundle.min.js"></script>
 
         <!-- Custom JS Script -->
-        <script>
-           document.addEventListener("DOMContentLoaded", function () {
+       <script>
+document.addEventListener("DOMContentLoaded", function () {
     const downloadBtn = document.getElementById("downloadBtn");
 
     downloadBtn.addEventListener("click", async function () {
@@ -105,50 +105,46 @@
         const url = urlInput.value;
 
         if (!url) {
-            downloadBtn.innerHTML = "⚠️ Enter a URL!";
-            setTimeout(() => {
-                downloadBtn.innerHTML = 'Download <i class="fa-solid fa-download"></i>';
-            }, 2000);
+            alert("Please enter a URL!");
             return;
         }
 
         downloadBtn.innerHTML = "⏳ Downloading...";
         downloadBtn.disabled = true;
 
+        const backendUrl = "https://senin-backend-adin.onrender.com";  // Backend URL BURAYA
+
         try {
-            const backendUrl = "https://downloadify-2.onrender.com";
-            const response = await fetch(`${backendUrl}/api/scrape`, { 
+            const response = await fetch(`${backendUrl}/api/scrape`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url })
+                body: JSON.stringify({ url }),
             });
 
-            if (!response.ok) {
-                throw new Error("❌ Download Failed!");
-            }
+            if (!response.ok) throw new Error("Backend error!");
 
             const blob = await response.blob();
+            const urlBlob = URL.createObjectURL(blob);
             const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.href = urlBlob;
             downloadLink.download = "website.zip";
             document.body.appendChild(downloadLink);
             downloadLink.click();
+            URL.revokeObjectURL(urlBlob);
             document.body.removeChild(downloadLink);
 
             downloadBtn.innerHTML = "✅ Download Complete!";
-            setTimeout(() => {
-                downloadBtn.innerHTML = 'Download <i class="fa-solid fa-download"></i>';
-                downloadBtn.disabled = false;
-            }, 3000);
         } catch (error) {
-            downloadBtn.innerHTML = "❌ Error!";
+            console.error(error);
+            downloadBtn.innerHTML = "❌ Error Occurred";
+        } finally {
             setTimeout(() => {
                 downloadBtn.innerHTML = 'Download <i class="fa-solid fa-download"></i>';
                 downloadBtn.disabled = false;
-            }, 3000);
+            }, 2000);
         }
     });
 });
-        </script>
+
     </body>
 </html>
