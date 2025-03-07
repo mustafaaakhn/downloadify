@@ -12,7 +12,7 @@ async function scrapeWebsite(url) {
     if (!fs.existsSync(savePath)) fs.mkdirSync(savePath, { recursive: true });
 
     console.log("📥 Downloading static files...");
-    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent=\"Mozilla/5.0 (compatible)\" ${url}`;
+    const wgetCommand = `wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --execute robots=off --timeout=1200 --user-agent="Mozilla/5.0 (compatible)" "${url}"`;
 
     try {
         execSync(wgetCommand, { stdio: 'inherit', cwd: savePath });
@@ -38,10 +38,7 @@ async function createZip(sourceDir, zipPath) {
             resolve(zipPath);
         });
 
-        archive.on('error', (err) => {
-            console.error("🚨 ZIP creation error:", err);
-            reject(err);
-        });
+        archive.on('error', reject);
 
         archive.pipe(output);
         archive.directory(sourceDir, false);
