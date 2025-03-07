@@ -1,34 +1,31 @@
 const express = require("express");
 const cors = require("cors");
-const scraper = require("./scraper");
-
-const app = express();
+const { scrapeWebsite } = require("./scraper");
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+const app = express();
 app.use(express.json());
+app.use(cors());
 
-app.get("/", (req, res) => {
-    res.send("✅ Backend Çalışıyor!");
-});
+app.get("/", (req, res) => res.send("✅ Backend çalışıyor!"));
 
 app.post("/api/scrape", async (req, res) => {
     const { url } = req.body;
-    console.log("✅ API isteği alındı! URL:", url);
 
     if (!url) {
         return res.status(400).json({ error: "URL gerekli" });
     }
 
     try {
-        const zipPath = await scraper.scrapeWebsite(url);
+        await scrapeWebsite(url);
+        const zipPath = path.join(__dirname, 'downloads', new URL(url).hostname + '.zip');
         res.download(zipPath);
     } catch (error) {
-        console.error("🚨 Hata oluştu:", error);
         res.status(500).json({ error: error.message });
     }
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(port, "0.0.0.0", () => {
-    console.log(`✅ Sunucu çalışıyor: http://localhost:${port}`);
+    console.log(`✅ Backend çalışıyor: http://localhost:${port}`);
 });
