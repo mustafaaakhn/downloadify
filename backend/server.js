@@ -24,25 +24,19 @@ app.get("/", (req, res) => {
 
 app.post("/api/scrape", async (req, res) => {
     const { url } = req.body;
+    const userIP = req.headers["x-forwarded-for"] || req.socket.remoteAddress; // Kullanıcının IP adresi
+
+    console.log(`🌍 Kullanıcı: ${userIP} - Web Sitesi: ${url}`);
+
     if (!url) {
         return res.status(400).json({ error: "URL is required." });
     }
 
     try {
         const zipPath = await scrapeWebsite(url);
-
-        if (!fs.existsSync(zipPath)) {
-            throw new Error("ZIP file does not exist.");
-        }
-
-        res.set({
-            "Content-Type": "application/zip",
-            "Content-Disposition": `attachment; filename="${path.basename(zipPath)}"`,
-        });
-
-        res.sendFile(zipPath);
+        res.download(zipPath);
     } catch (error) {
-        console.error("🚨 Backend error:", error);
+        console.error("🚨 Hata oluştu:", error);
         res.status(500).json({ error: error.message });
     }
 });
